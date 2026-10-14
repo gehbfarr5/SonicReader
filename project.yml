@@ -1,0 +1,69 @@
+name: SonicReader
+options:
+  bundleIdPrefix: com.jin
+  deploymentTarget:
+    iOS: '18.0'
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    TARGETED_DEVICE_FAMILY: '1,2'
+    MARKETING_VERSION: '0.1.9'
+    CURRENT_PROJECT_VERSION: '10'
+    APP_GROUP_ID: group.com.jin.sonicreader
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    DEVELOPMENT_TEAM: ''
+targets:
+  SonicReader:
+    type: application
+    platform: iOS
+    sources: [App, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jin.sonicreader
+        INFOPLIST_FILE: App/Info.plist
+        CODE_SIGN_ENTITLEMENTS: App/SonicReader.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - target: SonicShare
+        embed: true
+  SonicShare:
+    type: app-extension
+    platform: iOS
+    sources: [ShareExtension, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jin.sonicreader.share
+        INFOPLIST_FILE: ShareExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/SonicShare.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+  SonicReaderTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests/Unit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jin.sonicreader.tests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies: [{target: SonicReader}]
+  SonicReaderUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Tests/UI]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jin.sonicreader.uitests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies: [{target: SonicReader}]
+schemes:
+  SonicReader:
+    build:
+      targets:
+        SonicReader: all
+        SonicShare: all
+    test:
+      targets: [SonicReaderTests, SonicReaderUITests]
+      gatherCoverageData: true
