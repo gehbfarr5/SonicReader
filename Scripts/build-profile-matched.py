@@ -8,8 +8,8 @@ import argparse, datetime, hashlib, json, pathlib, plistlib, re, shutil, subproc
 parser = argparse.ArgumentParser()
 parser.add_argument('profile', type=pathlib.Path)
 parser.add_argument('--group')
-parser.add_argument('--version', default='0.1.9')
-parser.add_argument('--build', default='10')
+parser.add_argument('--version', default='0.1.10')
+parser.add_argument('--build', default='11')
 args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parent.parent
 profile_path = args.profile.expanduser().resolve()

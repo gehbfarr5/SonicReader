@@ -48,12 +48,12 @@ final class ShortcutReadingSession {
 
 @available(iOS 26.0, *)
 struct ReadCopiedTextIntent: AudioPlaybackIntent {
-    static let title: LocalizedStringResource = "确认文本并朗读"
-    static let description = IntentDescription("显示传入文本，确认后在浮窗朗读。用于复制后的控制中心快捷指令。")
+    static let title: LocalizedStringResource = "直接朗读文本"
+    static let description = IntentDescription("直接朗读传入文本，并在浮窗显示正文。用于复制后的控制中心快捷指令。")
     static let openAppWhenRun = false
 
     @Parameter(title: "文本") var text: String
-    static var parameterSummary: some ParameterSummary { Summary("确认并朗读 \(\.$text)") }
+    static var parameterSummary: some ParameterSummary { Summary("朗读 \(\.$text)") }
 
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -61,11 +61,6 @@ struct ReadCopiedTextIntent: AudioPlaybackIntent {
             throw ReaderError.invalidText("剪贴板没有文字。请先复制需要朗读的英文，再运行快捷指令。")
         }
         let validated = try SelectionText.validate(text)
-        // Use the same interactive confirmation path as the working B release.
-        // A one-option requestChoice compiled, but its device presentation was not verified.
-        try await requestConfirmation(
-            actionName: .custom(acceptLabel: "开始朗读", acceptAlternatives: [], denyLabel: "关闭", denyAlternatives: []),
-            showDialogAsPrompt: false, snippetIntent: CopiedTextPreviewIntent(text: validated))
         try Task.checkCancellation()
         let session = ShortcutReadingSession.shared
         let id = try session.begin(text: validated)
@@ -78,28 +73,6 @@ struct ReadCopiedTextIntent: AudioPlaybackIntent {
                 snippetIntent: ReadingPlaybackSnippetIntent(sessionID: id, presentationID: presentationID))
         }
         return .result()
-    }
-}
-
-@available(iOS 26.0, *)
-struct CopiedTextPreviewIntent: SnippetIntent {
-    static let title: LocalizedStringResource = "文本预览"
-    static let isDiscoverable = false
-    @Parameter(title: "文本") var text: String
-    init() {}
-    init(text: String) { self.text = text }
-    func perform() async throws -> some IntentResult & ShowsSnippetView {
-        .result(view: CopiedTextPreviewView(text: text))
-    }
-}
-
-private struct CopiedTextPreviewView: View {
-    let text: String
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("确认需要朗读的文本", systemImage: "doc.on.clipboard").font(.headline)
-            Text(text).fixedSize(horizontal: false, vertical: true)
-        }.padding()
     }
 }
 
